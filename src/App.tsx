@@ -1,3 +1,7 @@
+<h1 className="text-2xl font-bold font-voltaire bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+  Rave.AI
+</h1>
+
 import { useState, useCallback, useEffect } from 'react'
 import ReactPlayer from 'react-player/youtube'
 import { Play, Pause, Search, Music, Headphones, Volume2 } from 'lucide-react'
@@ -12,10 +16,13 @@ import { WaveformVisualizer } from './components/WaveformVisualizer'
 import { FloatingParticles } from './components/FloatingParticles'
 
 function App() {
-  const [youtubeUrl, setYoutubeUrl] = useState('https://www.youtube.com/@Weird0radi0')
-  const [videoId, setVideoId] = useState<string | null>(null)
+  const [youtubeUrl1, setYoutubeUrl1] = useState('https://www.youtube.com/watch?v=dQw4w9WgXcQ') // Default URL 1
+  const [videoId1, setVideoId1] = useState<string | null>(null)
+  const [youtubeUrl2, setYoutubeUrl2] = useState('https://www.youtube.com/watch?v=3YxaaGgTQYM') // Default URL 2
+  const [videoId2, setVideoId2] = useState<string | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
-  const [progress, setProgress] = useState(0)
+  const [progress1, setProgress1] = useState(0)
+  const [progress2, setProgress2] = useState(0)
   const [volume, setVolume] = useState([75])
 
   const extractVideoId = (url: string) => {
@@ -24,25 +31,40 @@ function App() {
     return match ? match[1] : null;
   };
 
-  const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUrlChange1 = (e: React.ChangeEvent<HTMLInputElement>) => {
     const url = e.target.value;
-    setYoutubeUrl(url);
+    setYoutubeUrl1(url);
     const id = extractVideoId(url);
     if (id) {
-      setVideoId(id);
-      toast.success('YouTube video loaded!')
+      setVideoId1(id);
+      toast.success('YouTube video 1 loaded!')
     } else {
-      setVideoId(null);
+      setVideoId1(null);
+    }
+  };
+
+  const handleUrlChange2 = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const url = e.target.value;
+    setYoutubeUrl2(url);
+    const id = extractVideoId(url);
+    if (id) {
+      setVideoId2(id);
+      toast.success('YouTube video 2 loaded!')
+    } else {
+      setVideoId2(null);
     }
   };
   
   useEffect(() => {
-    const id = extractVideoId(youtubeUrl);
-    if (id) {
-      setVideoId(id);
+    const id1 = extractVideoId(youtubeUrl1);
+    if (id1) {
+      setVideoId1(id1);
     }
-  }, [youtubeUrl]);
-
+    const id2 = extractVideoId(youtubeUrl2);
+    if (id2) {
+      setVideoId2(id2);
+    }
+  }, [youtubeUrl1, youtubeUrl2]);
 
   const togglePlayback = useCallback(() => {
     setIsPlaying(!isPlaying)
@@ -61,7 +83,7 @@ function App() {
                   <Headphones className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold font-heading bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                  <h1 className="text-2xl font-bold font-voltaire bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
                     Rave.AI
                   </h1>
                   <p className="text-sm text-white/60">AI Music Mashup Studio</p>
@@ -77,74 +99,120 @@ function App() {
         </div>
       </header>
 
-      <div className="max-w-4xl mx-auto px-4 py-8 relative z-10">
-        <div className="space-y-8">
-            <Card className="bg-white/5 border-white/10 backdrop-blur-md">
-              <CardContent className="p-6">
-                <h2 className="text-xl font-semibold text-white mb-4 flex items-center">
-                  <Music className="w-5 h-5 mr-2 text-purple-400" />
-                  Load a YouTube Video
-                </h2>
-                <div className="relative mb-6">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/40" />
-                  <Input
-                    placeholder="Paste a YouTube URL to start..."
-                    value={youtubeUrl}
-                    onChange={handleUrlChange}
-                    className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:border-purple-500"
-                  />
+      <div className="max-w-7xl mx-auto px-4 py-8 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* YouTube Player 1 */}
+          <Card className="bg-white/5 border-white/10 backdrop-blur-md">
+            <CardContent className="p-6">
+              <h2 className="text-xl font-semibold text-white mb-4 flex items-center">
+                <Music className="w-5 h-5 mr-2 text-purple-400" />
+                YouTube Video 1
+              </h2>
+              <div className="relative mb-6">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/40" />
+                <Input
+                  placeholder="Paste YouTube URL..."
+                  value={youtubeUrl1}
+                  onChange={handleUrlChange1}
+                  className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:border-purple-500"
+                />
+              </div>
+              
+              {videoId1 ? (
+                <div className='space-y-6'>
+                  <div className="aspect-video rounded-lg overflow-hidden shadow-2xl shadow-purple-500/20">
+                    <ReactPlayer
+                      url={`https://www.youtube.com/watch?v=${videoId1}`}
+                      width="100%"
+                      height="100%"
+                      controls
+                      playing={isPlaying}
+                      onProgress={(p) => setProgress1(p.played * 100)}
+                      volume={volume[0] / 100}
+                    />
+                  </div>
+
+                  <div className="space-y-3">
+                    <WaveformVisualizer isPlaying={isPlaying} progress={progress1} className="bg-white/5 backdrop-blur-sm" />
+                    <Progress value={progress1} className="h-1" />
+                  </div>
                 </div>
-                
-                {videoId ? (
-                  <div className='space-y-6'>
-                    <div className="aspect-video rounded-lg overflow-hidden shadow-2xl shadow-purple-500/20">
-                      <ReactPlayer
-                        url={`https://www.youtube.com/watch?v=${videoId}`}
-                        width="100%"
-                        height="100%"
-                        controls
-                        playing={isPlaying}
-                        onProgress={(p) => setProgress(p.played * 100)}
-                        volume={volume[0] / 100}
-                      />
-                    </div>
+              ) : (
+                <div className='text-center py-12 text-white/40'>
+                  <p>No video loaded.</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
-                    <div className="space-y-4 pt-4">
-                      <div className="space-y-3">
-                        <WaveformVisualizer isPlaying={isPlaying} progress={progress} className="bg-white/5 backdrop-blur-sm" />
-                        <Progress value={progress} className="h-1" />
-                      </div>
+          {/* YouTube Player 2 */}
+          <Card className="bg-white/5 border-white/10 backdrop-blur-md">
+            <CardContent className="p-6">
+              <h2 className="text-xl font-semibold text-white mb-4 flex items-center">
+                <Music className="w-5 h-5 mr-2 text-pink-400" />
+                YouTube Video 2
+              </h2>
+              <div className="relative mb-6">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/40" />
+                <Input
+                  placeholder="Paste YouTube URL..."
+                  value={youtubeUrl2}
+                  onChange={handleUrlChange2}
+                  className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:border-purple-500"
+                />
+              </div>
+              
+              {videoId2 ? (
+                <div className='space-y-6'>
+                  <div className="aspect-video rounded-lg overflow-hidden shadow-2xl shadow-pink-500/20">
+                    <ReactPlayer
+                      url={`https://www.youtube.com/watch?v=${videoId2}`}
+                      width="100%"
+                      height="100%"
+                      controls
+                      playing={isPlaying}
+                      onProgress={(p) => setProgress2(p.played * 100)}
+                      volume={volume[0] / 100}
+                    />
+                  </div>
 
-                      <div className="flex items-center justify-between">
-                        <Button
-                          onClick={togglePlayback}
-                          size="lg"
-                          className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-full w-12 h-12"
-                        >
-                          {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6 ml-1" />}
-                        </Button>
-                        
-                        <div className="flex items-center space-x-2 flex-1 ml-4">
-                          <Volume2 className="w-4 h-4 text-white/60" />
-                          <Slider
-                            value={volume}
-                            onValueChange={setVolume}
-                            max={100}
-                            step={1}
-                            className="flex-1"
-                          />
-                        </div>
-                      </div>
-                    </div>
+                  <div className="space-y-3">
+                    <WaveformVisualizer isPlaying={isPlaying} progress={progress2} className="bg-white/5 backdrop-blur-sm" />
+                    <Progress value={progress2} className="h-1" />
                   </div>
-                ) : (
-                  <div className='text-center py-12 text-white/40'>
-                    <p>No valid YouTube video loaded.</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                </div>
+              ) : (
+                <div className='text-center py-12 text-white/40'>
+                  <p>No video loaded.</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
+
+        {/* Global Controls */}
+        <Card className="bg-white/5 border-white/10 backdrop-blur-md mt-8">
+          <CardContent className="p-6 flex items-center justify-between">
+            <Button
+              onClick={togglePlayback}
+              size="lg"
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-full w-14 h-14 flex-shrink-0"
+            >
+              {isPlaying ? <Pause className="w-7 h-7" /> : <Play className="w-7 h-7 ml-1" />}
+            </Button>
+            
+            <div className="flex items-center space-x-4 flex-1 ml-6">
+              <Volume2 className="w-5 h-5 text-white/60" />
+              <Slider
+                value={volume}
+                onValueChange={setVolume}
+                max={100}
+                step={1}
+                className="flex-1"
+              />
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )
