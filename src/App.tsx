@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react'
-import { Play, Pause, Plus, Search, Music, Headphones, Volume2, Share2, Download, Loader2, Sparkles, Zap } from 'lucide-react'
+import ReactPlayer from 'react-player/youtube'
+import { Play, Pause, Music, Headphones, Volume2, Share2, Download, Loader2, Sparkles, Zap } from 'lucide-react'
 import { Button } from './components/ui/button'
 import { Input } from './components/ui/input'
 import { Card, CardContent } from './components/ui/card'
@@ -32,13 +33,22 @@ interface Mashup {
 
 function App() {
   const [selectedTracks, setSelectedTracks] = useState<Track[]>([])
-  const [searchQuery, setSearchQuery] = useState('')
   const [isCreating, setIsCreating] = useState(false)
   const [currentMashup, setCurrentMashup] = useState<Mashup | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [progress, setProgress] = useState(0)
   const [volume, setVolume] = useState([75])
   const [aiSuggestions, setAiSuggestions] = useState<string[]>([])
+  const [youtubeUrl1, setYoutubeUrl1] = useState('')
+  const [youtubeUrl2, setYoutubeUrl2] = useState('')
+
+  const handleUrlChange1 = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setYoutubeUrl1(e.target.value)
+  }
+
+  const handleUrlChange2 = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setYoutubeUrl2(e.target.value)
+  }
 
   // Generate AI suggestions when tracks are selected
   useEffect(() => {
@@ -53,34 +63,6 @@ function App() {
     } else {
       setAiSuggestions([])
     }
-  }, [selectedTracks])
-
-  // Mock data for demonstration
-  const mockTracks: Track[] = [
-    { id: '1', title: 'Blinding Lights', artist: 'The Weeknd', duration: '3:20', bpm: 171, key: 'F# minor', genre: 'Synthpop' },
-    { id: '2', title: 'Levitating', artist: 'Dua Lipa', duration: '3:23', bpm: 103, key: 'B minor', genre: 'Disco Pop' },
-    { id: '3', title: 'Good 4 U', artist: 'Olivia Rodrigo', duration: '2:58', bpm: 166, key: 'A major', genre: 'Pop Rock' },
-    { id: '4', title: 'Stay', artist: 'The Kid LAROI, Justin Bieber', duration: '2:21', bpm: 169, key: 'C major', genre: 'Hip Hop' },
-    { id: '5', title: 'Heat Waves', artist: 'Glass Animals', duration: '3:58', bpm: 80, key: 'C# minor', genre: 'Indie Pop' },
-    { id: '6', title: 'Industry Baby', artist: 'Lil Nas X, Jack Harlow', duration: '3:32', bpm: 150, key: 'C minor', genre: 'Hip Hop' },
-  ]
-
-  const filteredTracks = mockTracks.filter(track =>
-    track.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    track.artist.toLowerCase().includes(searchQuery.toLowerCase())
-  )
-
-  const addTrack = useCallback((track: Track) => {
-    if (selectedTracks.length >= 4) {
-      toast.error('Maximum 4 tracks allowed for mashup')
-      return
-    }
-    if (selectedTracks.find(t => t.id === track.id)) {
-      toast.error('Track already added')
-      return
-    }
-    setSelectedTracks(prev => [...prev, track])
-    toast.success(`Added "${track.title}" to mashup`)
   }, [selectedTracks])
 
   const removeTrack = useCallback((trackId: string) => {
@@ -160,57 +142,62 @@ function App() {
 
       <div className="max-w-7xl mx-auto px-4 py-8 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Track Search & Selection */}
-          <div className="lg:col-span-2 space-y-6">
-            <Card className="bg-white/5 border-white/10 backdrop-blur-md">
-              <CardContent className="p-6">
-                <h2 className="text-xl font-semibold text-white mb-4 flex items-center">
-                  <Search className="w-5 h-5 mr-2 text-purple-400" />
-                  Find Tracks
-                </h2>
-                <div className="relative mb-6">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/40" />
-                  <Input
-                    placeholder="Search for songs or artists..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:border-purple-500"
-                  />
-                </div>
-                
-                <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {filteredTracks.map(track => (
-                    <div key={track.id} className="flex items-center justify-between p-4 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
-                      <div className="flex items-center space-x-4">
-                        <div className="w-12 h-12 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-lg flex items-center justify-center">
-                          <Music className="w-6 h-6 text-purple-400" />
-                        </div>
-                        <div>
-                          <h3 className="font-medium text-white">{track.title}</h3>
-                          <p className="text-sm text-white/60">{track.artist}</p>
-                          <div className="flex items-center space-x-4 mt-1">
-                            <span className="text-xs text-white/40">{track.duration}</span>
-                            <span className="text-xs text-white/40">{track.bpm} BPM</span>
-                            <span className="text-xs text-white/40">{track.key}</span>
-                            <Badge variant="outline" className="text-xs border-white/20 text-white/60">
-                              {track.genre}
-                            </Badge>
-                          </div>
-                        </div>
-                      </div>
-                      <Button
-                        onClick={() => addTrack(track)}
-                        size="sm"
-                        className="bg-purple-600 hover:bg-purple-700 text-white"
-                        disabled={selectedTracks.some(t => t.id === track.id)}
-                      >
-                        <Plus className="w-4 h-4" />
-                      </Button>
+          <div className="lg:col-span-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* YouTube Video 1 */}
+              <Card className="bg-white/5 border-white/10 backdrop-blur-md">
+                <CardContent className="p-6">
+                  <h2 className="text-xl font-semibold text-white mb-4 flex items-center">
+                    <Music className="w-5 h-5 mr-2 text-purple-400" />
+                    YouTube Video 1
+                  </h2>
+                  <div className="relative mb-6">
+                    <Input
+                      placeholder="Paste YouTube URL..."
+                      value={youtubeUrl1}
+                      onChange={handleUrlChange1}
+                      className="pl-4 bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:border-purple-500"
+                    />
+                  </div>
+                  {youtubeUrl1 && (
+                    <div className="aspect-video">
+                      <ReactPlayer
+                        url={youtubeUrl1}
+                        width="100%"
+                        height="100%"
+                      />
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* YouTube Video 2 */}
+              <Card className="bg-white/5 border-white/10 backdrop-blur-md">
+                <CardContent className="p-6">
+                  <h2 className="text-xl font-semibold text-white mb-4 flex items-center">
+                    <Music className="w-5 h-5 mr-2 text-purple-400" />
+                    YouTube Video 2
+                  </h2>
+                  <div className="relative mb-6">
+                    <Input
+                      placeholder="Paste YouTube URL..."
+                      value={youtubeUrl2}
+                      onChange={handleUrlChange2}
+                      className="pl-4 bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:border-purple-500"
+                    />
+                  </div>
+                  {youtubeUrl2 && (
+                    <div className="aspect-video">
+                      <ReactPlayer
+                        url={youtubeUrl2}
+                        width="100%"
+                        height="100%"
+                      />
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
           </div>
 
           {/* Mashup Creator */}
